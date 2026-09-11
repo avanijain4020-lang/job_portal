@@ -31,10 +31,33 @@ app.get('/', (req, res) => {
 });
 
 // MongoDB Connection
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/jobportal';
-mongoose.connect(MONGO_URI)
-  .then(() => console.log('MongoDB Connected Successfully'))
-  .catch((err) => console.error('MongoDB Connection Error:', err));
+const MONGO_URI = process.env.MONGO_URI;
+
+// Vercel serverless ke liye connection caching
+let cachedConnection = null;
+
+async function connectDB() {
+  if (cachedConnection && mongoose.connection.readyState >= 1) {
+    return cachedConnection;
+  }
+  try {
+    const opts = {
+      bufferCommands: false,
+    };
+    cachedConnection = await mongoose.connect(MONGO_URI, opts);
+    console.log('MongoDB Connected Successfully');
+    return cachedConnection;
+  } catch (error) {
+    console.error('MongoDB Connection Error:', error);
+    throw error;
+  }
+}
+
+// Har API request se pehle database connect ho yeh ensure karne ke liye middleware ya function use karein:
+app.use(async (req, res, next) => {
+  await connectDB();
+  next();
+});
 
 // ==========================================
 // MULTER FILE UPLOAD SETUP FOR RESUME (PDF)
