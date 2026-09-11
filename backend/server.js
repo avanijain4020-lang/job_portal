@@ -25,6 +25,11 @@ if (!fs.existsSync(uploadsDir)) {
 }
 app.use('/uploads', express.static(uploadsDir));
 
+// Root Health-Check Route
+app.get('/', (req, res) => {
+  res.status(200).send('Job Portal Backend API is running live!');
+});
+
 // MongoDB Connection
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/jobportal';
 mongoose.connect(MONGO_URI)
@@ -530,10 +535,16 @@ app.patch('/api/applications/:id/status', handleStatusUpdate);
 app.put('/api/applications/status/:id', handleStatusUpdate);
 
 // ==========================================
-// SERVER LISTEN
+// EXPORT & LISTEN
 // ==========================================
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+
+// Local mode listener
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`Server running locally on port ${PORT}`);
+  });
+}
+
+// Vercel serverless function export
 module.exports = app;
-});
