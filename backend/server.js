@@ -13,9 +13,17 @@ const app = express();
 
 // Middleware
 app.use(express.json());
+
+// FIXED CORS: 'credentials: true' ke sath specific domains dena zaroori hai
 app.use(cors({
-  origin: '*',
-  credentials: true
+  origin: [
+    'https://job-portal-5uy9.vercel.app',
+    'http://localhost:5173',
+    'http://localhost:3000'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'user-id']
 }));
 
 // Static folder for uploaded resumes
@@ -53,7 +61,7 @@ async function connectDB() {
   }
 }
 
-// Har API request se pehle database connect ho yeh ensure karne ke liye middleware ya function use karein:
+// Har API request se pehle database connect ho yeh ensure karne ke liye middleware:
 app.use(async (req, res, next) => {
   await connectDB();
   next();
