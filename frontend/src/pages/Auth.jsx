@@ -42,10 +42,10 @@ const Auth = () => {
     setLoading(true);
 
     // FIX 1: Direct Express API Endpoints Match
-    const endpoint = isSignUp ? '/api/register' : '/api/login';
+    const endpoint = isSignUp ? '/register' : '/login';
 
     try {
-      const res = await axios.post(`http://localhost:5000${endpoint}`, formData);
+      const res = await API.post(endpoint, formData);
       
       localStorage.setItem('token', res.data.token || 'valid-token');
       localStorage.setItem('user', JSON.stringify(res.data.user || { role: formData.role }));
